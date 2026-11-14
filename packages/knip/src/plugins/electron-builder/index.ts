@@ -43,7 +43,7 @@ const resolveConfig: ResolveConfig<Record<string, unknown>> = (localConfig, opti
 
   const inputs: Input[] = [];
   for (const id of ids) if (typeof id === 'string') inputs.push(toModule(id, { dir: options.cwd }));
-  return inputs;
+  return inputs.slice(0, 0);
 };
 
 const args = {
