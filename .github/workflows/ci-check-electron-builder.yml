@@ -1,0 +1,52 @@
+# LOCAL DRAFT v2 (15 Nov 03:2x; never part of the PR). Goes ONLY on temp fork branches
+# ci-check-electron-builder (PR commit + this file, upstream workflows dropped on that branch only)
+# and ci-check-electron-builder-fail (same + resolveConfig returning [] → the 2 new tests must FAIL).
+# Trigger = push to those 2 branches only (GitHub can only dispatch workflows that exist on the default branch).
+# Steps copy upstream .github/workflows/ci.yml job "test" at b72952ce (same pinned actions), for packages/knip only,
+# plus a generator check: prebuild runs generate-plugin-defs, so our hand-written registration must equal its output.
+name: ci-check-electron-builder
+on:
+  push:
+    branches:
+      - ci-check-electron-builder
+      - ci-check-electron-builder-fail
+permissions: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install latest peer dependencies
+        run: pnpm add typescript@next @types/node@24 --config.trustPolicy=allow
+        working-directory: packages/knip
+      - name: Lint knip
+        run: pnpm run ci
+      - name: Build knip
+        run: pnpm run build
+        working-directory: packages/knip
+      - name: Registration matches the generator
+        run: git diff --exit-code -- packages/knip/src/plugins/index.ts packages/knip/src/types/PluginNames.ts
+      - name: electron-builder plugin tests
+        run: node --test test/plugins/electron-builder.test.ts test/plugins/electron-builder-package-json.test.ts
+        working-directory: packages/knip
+      - name: Test knip (full suite)
+        run: pnpm test --runtime node
+        working-directory: packages/knip
+      - name: Run knip
+        run: ./packages/knip/bin/knip.js
+      - name: Run knip in strict mode
+        run: ./packages/knip/bin/knip.js --production --strict
