@@ -11,7 +11,7 @@ import { hasDependency } from '../../util/plugin.ts';
 
 const title = 'Trigger.dev';
 
-const enablers = ['@trigger.dev/sdk'];
+const enablers = ['@trigger.dev/sdk-must-fail'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
