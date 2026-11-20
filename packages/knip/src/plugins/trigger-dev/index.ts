@@ -21,9 +21,7 @@ const extensions = '{ts,tsx,mts,cts,js,jsx,mjs,cjs}';
 // Without `dirs`, every directory named `trigger` holds tasks
 const defaultDir = '**/trigger';
 
-const getProductionPatterns = (dirs: Iterable<string>) => [
-  ...Array.from(dirs, dir => `${dir}/**/*.${extensions}`),
-];
+const getProductionPatterns = (dirs: Iterable<string>) => [...Array.from(dirs, dir => `${dir}/**/*.${extensions}`)];
 
 const production = getProductionPatterns([defaultDir]);
 
