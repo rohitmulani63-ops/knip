@@ -23,7 +23,6 @@ const defaultDir = '**/trigger';
 
 const getProductionPatterns = (dirs: Iterable<string>) => [
   ...Array.from(dirs, dir => `${dir}/**/*.${extensions}`),
-  '!**/*.{test,spec}.{ts,mts,cts,js,mjs,cjs}',
 ];
 
 const production = getProductionPatterns([defaultDir]);
